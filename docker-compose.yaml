@@ -1,0 +1,13 @@
+services:
+  dev:
+    container_name: project-dev
+    build:
+      context: .
+      dockerfile: ./docker/dev/Dockerfile
+      args:
+        PROJECT: ${PROJECT:-}
+    volumes:
+      - .:/app
+    ports:
+      - "3000:3000"
+      - "3001:3001"
