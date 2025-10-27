@@ -15,6 +15,7 @@ async function seedUsers() {
     );
   `;
 
+    console.log("seedUsers ");
   const insertedUsers = await Promise.all(
     users.map(async (user) => {
       const hashedPassword = await bcrypt.hash(user.password, 10);
@@ -26,6 +27,7 @@ async function seedUsers() {
     }),
   );
 
+    console.log("seedUsers done");
   return insertedUsers;
 }
 
@@ -42,6 +44,7 @@ async function seedInvoices() {
     );
   `;
 
+    console.log("seedInvoices ");
   const insertedInvoices = await Promise.all(
     invoices.map(
       (invoice) => sql`
@@ -52,7 +55,28 @@ async function seedInvoices() {
     ),
   );
 
+    console.log("seedInvoices done");
   return insertedInvoices;
+}
+
+async function fixSeedInvoices(){
+      await sql`
+        delete from invoices where id is not null;
+      `;
+
+        console.log("fixSeedInvoices ");
+      const insertedInvoices = await Promise.all(
+        invoices.map(
+          (invoice) => sql`
+            INSERT INTO invoices (customer_id, amount, status, date)
+            VALUES (${invoice.customer_id}, ${invoice.amount}, ${invoice.status}, ${invoice.date})
+            ON CONFLICT (id) DO NOTHING;
+          `,
+        ),
+      );
+
+        console.log("fixSeedInvoices done");
+      return insertedInvoices;
 }
 
 async function seedCustomers() {
@@ -67,6 +91,7 @@ async function seedCustomers() {
     );
   `;
 
+    console.log("seedCustomers ");
   const insertedCustomers = await Promise.all(
     customers.map(
       (customer) => sql`
@@ -77,6 +102,7 @@ async function seedCustomers() {
     ),
   );
 
+    console.log("seedCustomers done");
   return insertedCustomers;
 }
 
@@ -88,6 +114,7 @@ async function seedRevenue() {
     );
   `;
 
+    console.log("insertedRevenue ");
   const insertedRevenue = await Promise.all(
     revenue.map(
       (rev) => sql`
@@ -98,20 +125,26 @@ async function seedRevenue() {
     ),
   );
 
+    console.log("insertedRevenue done");
   return insertedRevenue;
 }
 
 export async function GET() {
   try {
+      console.log("Get Seed triggered")
+//     const result = await sql.begin((sql) => [
+//       seedUsers(),
+//       seedCustomers(),
+//       seedInvoices(),
+//       seedRevenue(),
+//     ]);
     const result = await sql.begin((sql) => [
-      seedUsers(),
-      seedCustomers(),
-      seedInvoices(),
-      seedRevenue(),
+      fixSeedInvoices(),
     ]);
 
     return Response.json({ message: 'Database seeded successfully' });
   } catch (error) {
+      console.error(error);
     return Response.json({ error }, { status: 500 });
   }
 }
