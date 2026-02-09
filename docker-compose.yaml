@@ -1,6 +1,6 @@
 services:
   dev:
-    container_name: project-dev
+    container_name: redis_nextjs_project
     build:
       context: .
       dockerfile: ./docker/dev/Dockerfile
@@ -11,3 +11,19 @@ services:
     ports:
       - "3000:3000"
       - "3001:3001"
+
+  db:
+    image: postgres:16
+    restart: always
+    shm_size: 128mb
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_DB: redis_nextjs_db
+      POSTGRES_PASSWORD: password
+    volumes:
+      - ./sql/:/docker-entrypoint-initdb.d/
+      - redis-postgres-db-data:/var/lib/postgresql/data/
+
+volumes:
+  redis-postgres-db-data: # data dir volume
