@@ -1,11 +1,17 @@
 services:
-  dev:
+  nextjs:
     container_name: redis_nextjs_project
     build:
       context: .
       dockerfile: ./docker/dev/Dockerfile
       args:
         PROJECT: ${PROJECT:-}
+    depends_on:
+      db:
+        condition: service_started
+        restart: true
+#      redis:
+#        condition: service_started
     volumes:
       - .:/app
     ports:

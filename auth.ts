@@ -6,7 +6,7 @@ import type { User } from '@/app/lib/definitions';
 import bcrypt from 'bcrypt';
 import postgres from 'postgres';
 
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+const sql = postgres(process.env.POSTGRES_URL!, { max : 10});
 
 async function getUser(email: String): Promise<User | undefined> {
     try {
@@ -23,6 +23,7 @@ export const { auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
         async authorize(credentials) {
+            console.log("authorize: test");
             const parsedCredentials = z
                 .object({ email : z.string().email(), password: z.string().min(6)})
                 .safeParse(credentials);
@@ -31,7 +32,9 @@ export const { auth, signIn, signOut } = NextAuth({
                 const {email, password} = parsedCredentials.data;
                 const user = await getUser(email);
                 if(!user) return null;
+                console.log("user is not null");
                 const passwordsMatch = await bcrypt.compare(password, user.password);
+                console.log(`user passwordsMatch: ${passwordsMatch}`);
                 if(passwordsMatch) return user;
             }
 
