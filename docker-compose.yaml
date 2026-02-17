@@ -6,17 +6,18 @@ services:
       dockerfile: ./docker/dev/Dockerfile
       args:
         PROJECT: ${PROJECT:-}
+    environment:
+      - REDIS_URL=redis://redis:6379
     depends_on:
-      db:
-        condition: service_started
-        restart: true
-#      redis:
-#        condition: service_started
+      - db
+      - redis
     volumes:
       - .:/app
     ports:
       - "3000:3000"
       - "3001:3001"
+    networks:
+      - app-network
 
   db:
     image: postgres:16
@@ -31,5 +32,26 @@ services:
       - ./sql/:/docker-entrypoint-initdb.d/
       - redis-postgres-db-data:/var/lib/postgresql/data/
 
+  redis:
+      image: redis:7-alpine
+      ports:
+        - "6379:6379" # Optionnel pour accès local
+      volumes:
+        - redis-data:/data
+      healthcheck:
+        test: [ "CMD", "redis-cli", "ping" ]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+      command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+      networks:
+        - app-network
+      restart: unless-stopped
+
 volumes:
   redis-postgres-db-data: # data dir volume
+  redis-data:
+
+networks:
+  app-network:
+    driver: bridge
