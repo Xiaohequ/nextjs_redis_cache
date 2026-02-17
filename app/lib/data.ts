@@ -8,18 +8,26 @@ import {
   Revenue,
 } from './definitions';
 import { formatCurrency } from './utils';
+import { redis } from './redis';
 
 const sql = postgres(process.env.POSTGRES_URL!, { max : 10});
 
 export async function fetchRevenue() {
   try {
+    const cacheKey = 'fetch_revenue';
     // Artificially delay a response for demo purposes.
     // Don't do this in production :)
+    const cachedData = await redis.get(cacheKey);
+    if(cachedData){
+      console.log('Fetching revenue data... hit cache');
+      return JSON.parse(cachedData);
+    }
 
-    console.log('Fetching revenue data...');
+    console.log('Fetching revenue data... miss cache');
     await new Promise((resolve) => setTimeout(resolve, 3000));
 
     const data = await sql<Revenue[]>`SELECT * FROM revenue`;
+    await redis.set(cacheKey, JSON.stringify(data), 'EX', 600)
 
     console.log('Data fetch completed after 3 seconds.');
 

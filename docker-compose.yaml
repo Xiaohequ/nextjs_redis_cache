@@ -31,6 +31,8 @@ services:
     volumes:
       - ./sql/:/docker-entrypoint-initdb.d/
       - redis-postgres-db-data:/var/lib/postgresql/data/
+    networks:
+      - app-network
 
   redis:
       image: redis:7-alpine
