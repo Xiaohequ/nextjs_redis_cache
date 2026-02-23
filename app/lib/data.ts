@@ -14,7 +14,7 @@ const sql = postgres(process.env.POSTGRES_URL!, { max : 10});
 
 export async function fetchRevenue() {
   try {
-    const cacheKey = 'fetch_revenue';
+    const cacheKey = 'cache:fetch_revenue';
     // Artificially delay a response for demo purposes.
     // Don't do this in production :)
     const cachedData = await redis.get(cacheKey);

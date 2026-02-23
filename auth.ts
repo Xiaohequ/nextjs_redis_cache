@@ -5,6 +5,8 @@ import { z } from 'zod';
 import type { User } from '@/app/lib/definitions';
 import bcrypt from 'bcrypt';
 import postgres from 'postgres';
+import {redis} from "@/app/lib/redis";
+import {IORedisAdapter} from "@/app/lib/IORedisAdapter";
 
 const sql = postgres(process.env.POSTGRES_URL!, { max : 10});
 
@@ -20,6 +22,7 @@ async function getUser(email: String): Promise<User | undefined> {
 
 export const { auth, signIn, signOut } = NextAuth({
   ...authConfig,
+  adapter: IORedisAdapter(redis),
   providers: [
     Credentials({
         async authorize(credentials) {
@@ -44,5 +47,9 @@ export const { auth, signIn, signOut } = NextAuth({
             return null;
         }
     })
-  ]
+  ],
+    // session: {
+    //     strategy: "database", // Très important : force l'usage de l'adapter Redis
+    //     maxAge: 30 * 24 * 60 * 60, // 30 jours en secondes
+    // },
 });

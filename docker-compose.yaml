@@ -45,7 +45,7 @@ services:
         interval: 10s
         timeout: 5s
         retries: 5
-      command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+      command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy volatile-lru
       networks:
         - app-network
       restart: unless-stopped
