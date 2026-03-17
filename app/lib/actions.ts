@@ -5,6 +5,8 @@ import {revalidatePath } from 'next/cache';
 import {redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
+import { cookies } from 'next/headers';
+import { redis } from '@/app/lib/redis';
 
 const sql = postgres(process.env.POSTGRES_URL!, {ssl : 'require'});
 
@@ -129,4 +131,38 @@ export async function authenticate(
     }
     throw error;
   }
+}
+
+export async function logout() {
+  const sessionCookieName =
+    process.env.NODE_ENV === 'production' ? '__Secure-session-id' : 'session-id';
+    console.log(`logout: ${sessionCookieName}`)
+
+  const cookieStore = await cookies();
+  const sessionId = cookieStore.get(sessionCookieName)?.value;
+
+  if (sessionId) {
+    const stored = await redis.get(`session:${sessionId}`);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as { id?: string };
+        if (parsed?.id) {
+          await redis.srem(`user_sessions:${parsed.id}`, sessionId);
+        }
+      } catch {
+        // ignore parse issues; still revoke the session key below
+      }
+    }
+    await redis.del(`session:${sessionId}`);
+  }
+
+  cookieStore.set(sessionCookieName, '', {
+    httpOnly: true,
+    sameSite: 'lax',
+    path: '/',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 0,
+  });
+
+  redirect('/login');
 }
