@@ -136,7 +136,6 @@ export async function authenticate(
 export async function logout() {
   const sessionCookieName =
     process.env.NODE_ENV === 'production' ? '__Secure-session-id' : 'session-id';
-    console.log(`logout: ${sessionCookieName}`)
 
   const cookieStore = await cookies();
   const sessionId = cookieStore.get(sessionCookieName)?.value;

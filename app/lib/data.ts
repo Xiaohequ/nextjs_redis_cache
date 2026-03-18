@@ -24,7 +24,7 @@ export async function fetchRevenue() {
     }
 
     console.log('Fetching revenue data... miss cache');
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+//     await new Promise((resolve) => setTimeout(resolve, 3000));
 
     const data = await sql<Revenue[]>`SELECT * FROM revenue`;
     await redis.set(cacheKey, JSON.stringify(data), 'EX', 600)
@@ -41,7 +41,7 @@ export async function fetchRevenue() {
 export async function fetchLatestInvoices() {
   try {
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+//     await new Promise((resolve) => setTimeout(resolve, 2000));
 
 
     const data = await sql<LatestInvoiceRaw[]>`
@@ -64,7 +64,7 @@ export async function fetchLatestInvoices() {
 
 export async function fetchCardData() {
   try {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+//     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // You can probably combine these into a single SQL query
     // However, we are intentionally splitting them to demonstrate

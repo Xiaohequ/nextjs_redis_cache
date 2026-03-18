@@ -6,8 +6,6 @@ export const authConfig = {
   },
   callbacks : {
     authorized({ auth, request : {nextUrl}}){
-        // Laisse le middleware/protected layouts gérer l'accès.
-        console.log(`authorized (edge): user = ${JSON.stringify(auth?.user)}, path = ${nextUrl.pathname}`);
         return true;
     }
   },
