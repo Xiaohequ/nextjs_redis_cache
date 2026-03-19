@@ -19,6 +19,25 @@ services:
     networks:
       - app-network
 
+  worker:
+    container_name: redis_worker
+    build:
+      context: .
+      dockerfile: ./docker/dev/Dockerfile
+      args:
+        PROJECT: ${PROJECT:-}
+    command: ["pnpm", "tsx", "watch", "app/lib/workers/email.worker.ts"]  # tsx watch = hot reload en dev
+    environment:
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy  # attend que Redis soit prêt
+    volumes:
+      - .:/app
+    networks:
+      - app-network
+    restart: unless-stopped
+
   db:
     image: postgres:16
     restart: always
