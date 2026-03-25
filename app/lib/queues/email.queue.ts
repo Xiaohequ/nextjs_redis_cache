@@ -1,5 +1,5 @@
 import { Queue } from 'bullmq';
-import connection from '@/app/lib/redis_mq';
+import { connection } from '@/app/lib/redis_mq';
 
 export const emailQueue = new Queue('emails', {
   connection: connection,

@@ -7,6 +7,7 @@ import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
 import { cookies } from 'next/headers';
 import { redis } from '@/app/lib/redis';
+import { emailQueue } from '@/app/lib/queues/email.queue';
 
 const sql = postgres(process.env.POSTGRES_URL!, {ssl : 'require'});
 
@@ -164,4 +165,14 @@ export async function logout() {
   });
 
   redirect('/login');
+}
+
+export async function sendMail(){
+    console.log("call send mail");
+
+    const email = { to : "test@mail.com", subject: "Test send mail", body: "body mail"}
+
+    const job = await emailQueue.add('send', email);
+
+//     return NextResponse.json({jobId: job.id, status: 'queued'});
 }

@@ -1,5 +1,5 @@
 import { Worker } from 'bullmq';
-import connection from '@/app/lib/redis_mq';
+import { connection } from '@/app/lib/redis_mq';
 
 const worker = new Worker(
   'emails', // doit correspondre au nom de la Queue
