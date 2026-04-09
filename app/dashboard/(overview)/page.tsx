@@ -6,12 +6,21 @@ import { Suspense } from 'react';
 import { RevenueChartSkeleton, LatestInvoicesSkeleton, CardsSkeleton } from '@/app/ui/skeletons';
 import CardWrapper from '@/app/ui/dashboard/cards';
 import { Metadata } from 'next';
+import { headers } from 'next/headers';
+import { trackPageView, trackPopularPage } from '@/lib/stats';
 
 export const metadata : Metadata = {
     title : 'Home'
 };
 
 export default async function Page() {
+    const headersList = await headers();
+   const userAgent = headersList.get('user-agent') || '';
+   const isBot = /bot|crawler|spider|googlebot/i.test(userAgent);
+   if (!isBot) {
+     await trackPageView(`/dashboard`);
+     await trackPopularPage(`/dashboard`);
+   }
     return (
       <main>
         <h1 className={`${lusitana.className} mb-4 text-xl md:text-2xl`}>

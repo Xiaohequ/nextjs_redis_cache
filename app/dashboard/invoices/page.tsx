@@ -7,6 +7,8 @@ import { InvoicesTableSkeleton } from '@/app/ui/skeletons';
 import { Suspense } from 'react';
 import { fetchInvoicesPages } from '@/app/lib/data';
 import { Metadata } from 'next';
+import { headers } from 'next/headers';
+import { trackPageView, trackPopularPage } from '@/lib/stats';
 
 export const metadata : Metadata = {
     title : 'Invoices'
@@ -17,6 +19,14 @@ export default async function Page(props : {searchParams?: Promise<{query?: Stri
     const query = searchParams?.query || '';
     const currentPage = Number(searchParams?.page) || 1;
     const totalPages = await fetchInvoicesPages(query);
+
+        const headersList = await headers();
+       const userAgent = headersList.get('user-agent') || '';
+       const isBot = /bot|crawler|spider|googlebot/i.test(userAgent);
+       if (!isBot) {
+         await trackPageView(`/dashboard/invoices`);
+         await trackPopularPage(`/dashboard/invoices`);
+       }
 
   return (
     <div className="w-full">
